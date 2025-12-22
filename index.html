@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="et">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Päevaplaan · Self-Care Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">Päevaplaan</h1>
+                <p class="subtitle">Hoolitse enda eest, samm korraga</p>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="completedToday">0</span>
+                    <span class="stat-label">täna tehtud</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-value" id="totalToday">0</span>
+                    <span class="stat-label">kokku</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Add Task Form -->
+        <section class="add-task-section">
+            <button class="add-task-toggle" id="addTaskToggle" aria-expanded="false">
+                <span class="toggle-icon">+</span>
+                <span>Lisa uus ülesanne</span>
+            </button>
+
+            <form class="add-task-form hidden" id="addTaskForm" aria-hidden="true">
+                <div class="form-group">
+                    <label for="taskTitle">Ülesanne</label>
+                    <input type="text" id="taskTitle" name="title" placeholder="nt. Joo 2L vett" required
+                        autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label for="taskDescription">Kirjeldus (valikuline)</label>
+                    <textarea id="taskDescription" name="description" placeholder="Miks see oluline on?"
+                        rows="2"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskCategory">Kategooria</label>
+                        <select id="taskCategory" name="category">
+                            <option value="health">Tervis</option>
+                            <option value="productivity">Produktiivsus</option>
+                            <option value="social">Sotsiaalne</option>
+                            <option value="rest">Puhkus</option>
+                            <option value="other">Muu</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskRepeat">Kordus</label>
+                        <select id="taskRepeat" name="repeat_type">
+                            <option value="daily">Iga päev</option>
+                            <option value="weekly">Iga nädal</option>
+                            <option value="custom">Kohandatud</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelTask">Tühista</button>
+                    <button type="submit" class="btn btn-primary">Salvesta</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Filter Controls -->
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Kõik</button>
+            <button class="filter-btn" data-filter="health">Tervis</button>
+            <button class="filter-btn" data-filter="productivity">Produktiivsus</button>
+            <button class="filter-btn" data-filter="social">Sotsiaalne</button>
+            <button class="filter-btn" data-filter="rest">Puhkus</button>
+        </div>
+
+        <!-- Tasks List -->
+        <main class="tasks-container">
+            <div class="tasks-list" id="tasksList" role="list">
+                <!-- Tasks will be rendered here -->
+                <div class="empty-state" id="emptyState">
+                    <p>Ühtegi ülesannet pole veel lisatud</p>
+                    <p class="empty-state-hint">Alusta oma päeva planeerimist nupust üleval</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Loading & Error States -->
+        <div class="loading hidden" id="loadingState">
+            <div class="loading-spinner"></div>
+            <p>Laen andmeid...</p>
+        </div>
+
+        <div class="error hidden" id="errorState">
+            <p>Midagi läks valesti. Palun proovi uuesti.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
