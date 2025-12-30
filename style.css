@@ -16,6 +16,11 @@
     --color-social: #ec4899;
     --color-rest: #8b5cf6;
     --color-other: #6b7280;
+    --color-hobbies: #a855f7;
+    --color-finance: #10b981;
+    --color-household: #f97316;
+    --color-learning: #3b82f6;
+    --color-nutrition: #84cc16;
     
     /* Spacing */
     --space-xs: 0.5rem;
@@ -389,6 +394,26 @@ body {
 
 .task-card[data-category="rest"] {
     --task-color: var(--color-rest);
+}
+
+.task-card[data-category="hobbies"] {
+    --task-color: var(--color-hobbies);
+}
+
+.task-card[data-category="finance"] {
+    --task-color: var(--color-finance);
+}
+
+.task-card[data-category="household"] {
+    --task-color: var(--color-household);
+}
+
+.task-card[data-category="learning"] {
+    --task-color: var(--color-learning);
+}
+
+.task-card[data-category="nutrition"] {
+    --task-color: var(--color-nutrition);
 }
 
 .task-card[data-category="other"] {

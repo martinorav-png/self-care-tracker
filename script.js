@@ -382,19 +382,22 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-/**
- * Get category label in Estonian
- */
 function getCategoryLabel(category) {
     const labels = {
         health: 'Tervis',
         productivity: 'Produktiivsus',
         social: 'Sotsiaalne',
         rest: 'Puhkus',
+        hobbies: 'Hobbid',
+        finance: 'Rahandus',
+        household: 'Kodutööd',
+        learning: 'Õppimine',
+        nutrition: 'Toitumine',
         other: 'Muu'
     };
     return labels[category] || category;
 }
+
 
 /**
  * Get repeat type label in Estonian
