@@ -21,6 +21,21 @@
                     <span class="theme-icon">🌙</span>
                 </button>
             </div>
+
+            <!-- Streak Display -->
+            <div class="streak-container" id="streakContainer">
+                <div class="streak-badge" id="streakBadge">
+                    <span class="streak-flame">🔥</span>
+                    <div class="streak-info">
+                        <span class="streak-number" id="streakNumber">0</span>
+                        <span class="streak-label">päeva streak</span>
+                    </div>
+                </div>
+                <button class="streak-details-btn" id="streakDetailsBtn" aria-label="Vaata streak detaile">
+                    <span>Detailid</span>
+                </button>
+            </div>
+
             <div class="stats">
                 <div class="stat-item">
                     <span class="stat-value" id="completedToday">0</span>
@@ -128,6 +143,39 @@
 
         <div class="error hidden" id="errorState">
             <p>Midagi läks valesti. Palun proovi uuesti.</p>
+        </div>
+    </div>
+
+    <!-- Streak Details Modal -->
+    <div class="modal-overlay hidden" id="streakModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Sinu Streak'd 🔥</h2>
+                <button class="modal-close" id="closeStreakModal" aria-label="Sulge">×</button>
+            </div>
+            <div class="modal-content">
+                <div class="streak-overall">
+                    <div class="streak-big-number">
+                        <span class="streak-flame-big">🔥</span>
+                        <span class="streak-number-big" id="streakNumberBig">0</span>
+                    </div>
+                    <p class="streak-description">päeva järjest vähemalt üks ülesanne täidetud!</p>
+                </div>
+
+                <div class="streak-milestones">
+                    <h3>Saavutused</h3>
+                    <div class="milestones-grid" id="milestonesGrid">
+                        <!-- Milestones will be rendered here -->
+                    </div>
+                </div>
+
+                <div class="category-streaks">
+                    <h3>Kategooriate kaupa</h3>
+                    <div class="category-streaks-list" id="categoryStreaksList">
+                        <!-- Category streaks will be rendered here -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
