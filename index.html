@@ -17,6 +17,9 @@
             <div class="header-content">
                 <h1 class="title">Päevaplaan</h1>
                 <p class="subtitle">Hoolitse enda eest, samm korraga</p>
+                <button class="theme-toggle" id="themeToggle" aria-label="Vaheta teemat">
+                    <span class="theme-icon">🌙</span>
+                </button>
             </div>
             <div class="stats">
                 <div class="stat-item">
@@ -27,6 +30,13 @@
                 <div class="stat-item">
                     <span class="stat-value" id="totalToday">0</span>
                     <span class="stat-label">kokku</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item stat-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span class="stat-label">progress</span>
                 </div>
             </div>
         </header>
@@ -120,6 +130,12 @@
             <p>Midagi läks valesti. Palun proovi uuesti.</p>
         </div>
     </div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
 
     <script src="script.js"></script>
 </body>

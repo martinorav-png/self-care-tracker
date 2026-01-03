@@ -2,7 +2,7 @@
 // Supabase Configuration
 // ================================
 const SUPABASE_URL = 'https://rjnbkoycknhqzjwogvmx.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_LLlWWs0FO2FdmQ3z79SSTg_yctpvcFw'; // Replace with your actual anon key
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqbmJrb3lja25ocXpqd29ndm14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYzMTkyMDYsImV4cCI6MjA4MTg5NTIwNn0.-T1Mquq8WV3ZjkZlmqLd52GGupCaHlXYxrzcI5fVmg4';
 
 // Initialize Supabase client
 let db;
@@ -106,11 +106,15 @@ async function addTask(taskData) {
         updateStats();
         saveToLocalStorage();
         
+        // Show success toast
+        showToast('Ülesanne lisatud!', 'success');
+        
         console.log('Task added to local state');
         return data[0];
     } catch (error) {
         console.error('Error adding task:', error);
         showError('Ülesande lisamine ebaõnnestus: ' + error.message);
+        showToast('Viga ülesande lisamisel', 'error');
         throw error;
     }
 }
@@ -162,9 +166,13 @@ async function deleteTask(taskId) {
         renderTasks();
         updateStats();
         saveToLocalStorage();
+        
+        // Show success toast
+        showToast('Ülesanne kustutatud', 'success');
     } catch (error) {
         console.error('Error deleting task:', error);
         showError('Ülesande kustutamine ebaõnnestus');
+        showToast('Viga kustutamisel', 'error');
         throw error;
     }
 }
@@ -182,6 +190,12 @@ async function toggleTaskCompletion(taskId) {
     };
     
     await updateTask(taskId, updates);
+    
+    // Show confetti and toast when completing
+    if (updates.is_completed) {
+        createConfetti();
+        showToast('Tubli töö! 🎉', 'success');
+    }
 }
 
 // ================================
@@ -257,6 +271,9 @@ function updateStats() {
     
     elements.completedToday.textContent = completedCount;
     elements.totalToday.textContent = todayTasks.length;
+    
+    // Update progress bar
+    updateProgressBar();
 }
 
 // ================================
@@ -315,7 +332,6 @@ elements.addTaskForm.addEventListener('submit', async (e) => {
         console.log('Task added successfully!');
     } catch (error) {
         console.error('Form submission error:', error);
-        alert('Viga ülesande lisamisel: ' + error.message);
     }
 });
 
@@ -382,6 +398,9 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+/**
+ * Get category label in Estonian
+ */
 function getCategoryLabel(category) {
     const labels = {
         health: 'Tervis',
@@ -398,7 +417,6 @@ function getCategoryLabel(category) {
     return labels[category] || category;
 }
 
-
 /**
  * Get repeat type label in Estonian
  */
@@ -409,6 +427,47 @@ function getRepeatLabel(repeatType) {
         custom: 'Kohandatud'
     };
     return labels[repeatType] || repeatType;
+}
+
+/**
+ * Show toast notification
+ */
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icon = type === 'success' ? '✓' : '✕';
+    toast.innerHTML = `
+        <span class="toast-icon">${icon}</span>
+        <span>${message}</span>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Remove after animation
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+/**
+ * Update progress bar
+ */
+function updateProgressBar() {
+    const today = new Date().toDateString();
+    const todayTasks = tasks.filter(t => {
+        const taskDate = new Date(t.created_at).toDateString();
+        return taskDate === today || t.repeat_type === 'daily';
+    });
+    
+    const completedCount = todayTasks.filter(t => t.is_completed).length;
+    const percentage = todayTasks.length > 0 ? (completedCount / todayTasks.length) * 100 : 0;
+    
+    const progressFill = document.getElementById('progressFill');
+    if (progressFill) {
+        progressFill.style.width = percentage + '%';
+    }
 }
 
 // ================================
@@ -443,12 +502,96 @@ function loadFromLocalStorage() {
 }
 
 // ================================
+// Confetti Animation
+// ================================
+function createConfetti() {
+    const canvas = document.getElementById('confettiCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const confettiCount = 50;
+    const confetti = [];
+    const colors = ['#7c3aed', '#a78bfa', '#ec4899', '#0ea5e9', '#10b981'];
+    
+    for (let i = 0; i < confettiCount; i++) {
+        confetti.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            size: Math.random() * 8 + 4,
+            speedY: Math.random() * 3 + 2,
+            speedX: Math.random() * 2 - 1,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * 360,
+            rotationSpeed: Math.random() * 10 - 5
+        });
+    }
+    
+    function updateConfetti() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        confetti.forEach((piece, index) => {
+            piece.y += piece.speedY;
+            piece.x += piece.speedX;
+            piece.rotation += piece.rotationSpeed;
+            
+            ctx.save();
+            ctx.translate(piece.x, piece.y);
+            ctx.rotate((piece.rotation * Math.PI) / 180);
+            ctx.fillStyle = piece.color;
+            ctx.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size);
+            ctx.restore();
+            
+            // Remove if off screen
+            if (piece.y > canvas.height) {
+                confetti.splice(index, 1);
+            }
+        });
+        
+        if (confetti.length > 0) {
+            requestAnimationFrame(updateConfetti);
+        } else {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+    
+    updateConfetti();
+}
+
+// ================================
 // Keyboard Navigation
 // ================================
 document.addEventListener('keydown', (e) => {
     // ESC to close form
     if (e.key === 'Escape' && !elements.addTaskForm.classList.contains('hidden')) {
         elements.cancelTask.click();
+    }
+});
+
+// ================================
+// Dark Mode
+// ================================
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = themeToggle?.querySelector('.theme-icon');
+
+// Load saved theme
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+if (themeIcon) {
+    themeIcon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+}
+
+// Toggle theme
+themeToggle?.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    if (themeIcon) {
+        themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
     }
 });
 
