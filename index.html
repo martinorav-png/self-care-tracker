@@ -17,9 +17,18 @@
             <div class="header-content">
                 <h1 class="title">Päevaplaan</h1>
                 <p class="subtitle">Hoolitse enda eest, samm korraga</p>
-                <button class="theme-toggle" id="themeToggle" aria-label="Vaheta teemat">
-                    <span class="theme-icon">🌙</span>
-                </button>
+                <div class="header-actions">
+                    <button class="header-btn" id="soundToggle" aria-label="Helide sisse/välja lülitamine"
+                        title="Helid">
+                        <span class="header-btn-icon">🔊</span>
+                    </button>
+                    <button class="header-btn" id="exportBtn" aria-label="Ekspordi andmed" title="Eksport/Import">
+                        <span class="header-btn-icon">💾</span>
+                    </button>
+                    <button class="theme-toggle" id="themeToggle" aria-label="Vaheta teemat">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Streak Display -->
@@ -56,11 +65,42 @@
             </div>
         </header>
 
+        <!-- Quick Add Buttons -->
+        <section class="quick-add-section">
+            <h3 class="quick-add-title">Kiire lisamine</h3>
+            <div class="quick-add-grid">
+                <button class="quick-add-btn" data-template="water">
+                    <span class="quick-add-icon">💧</span>
+                    <span class="quick-add-label">Joo vett</span>
+                </button>
+                <button class="quick-add-btn" data-template="outside">
+                    <span class="quick-add-icon">🚶</span>
+                    <span class="quick-add-label">Käi väljas</span>
+                </button>
+                <button class="quick-add-btn" data-template="break">
+                    <span class="quick-add-icon">☕</span>
+                    <span class="quick-add-label">Tee pause</span>
+                </button>
+                <button class="quick-add-btn" data-template="exercise">
+                    <span class="quick-add-icon">🏃</span>
+                    <span class="quick-add-label">Treening</span>
+                </button>
+                <button class="quick-add-btn" data-template="meditate">
+                    <span class="quick-add-icon">🧘</span>
+                    <span class="quick-add-label">Mediteeri</span>
+                </button>
+                <button class="quick-add-btn" data-template="sleep">
+                    <span class="quick-add-icon">😴</span>
+                    <span class="quick-add-label">Maga 8h</span>
+                </button>
+            </div>
+        </section>
+
         <!-- Add Task Form -->
         <section class="add-task-section">
             <button class="add-task-toggle" id="addTaskToggle" aria-expanded="false">
                 <span class="toggle-icon">+</span>
-                <span>Lisa uus ülesanne</span>
+                <span>Lisa kohandatud ülesanne</span>
             </button>
 
             <form class="add-task-form hidden" id="addTaskForm" aria-hidden="true">
@@ -84,7 +124,7 @@
                             <option value="productivity">Produktiivsus</option>
                             <option value="social">Sotsiaalne</option>
                             <option value="rest">Puhkus</option>
-                            <option value="hobbies">Hobbid</option>
+                            <option value="hobbies">Hobid</option>
                             <option value="finance">Rahandus</option>
                             <option value="household">Kodutööd</option>
                             <option value="learning">Õppimine</option>
@@ -117,7 +157,7 @@
             <button class="filter-btn" data-filter="productivity">Produktiivsus</button>
             <button class="filter-btn" data-filter="social">Sotsiaalne</button>
             <button class="filter-btn" data-filter="rest">Puhkus</button>
-            <button class="filter-btn" data-filter="hobbies">Hobbid</button>
+            <button class="filter-btn" data-filter="hobbies">Hobid</button>
             <button class="filter-btn" data-filter="finance">Rahandus</button>
             <button class="filter-btn" data-filter="household">Kodutööd</button>
             <button class="filter-btn" data-filter="learning">Õppimine</button>
@@ -130,12 +170,12 @@
                 <!-- Tasks will be rendered here -->
                 <div class="empty-state" id="emptyState">
                     <p>Ühtegi ülesannet pole veel lisatud</p>
-                    <p class="empty-state-hint">Alusta oma päeva planeerimist nupust üleval</p>
+                    <p class="empty-state-hint">Alusta oma päeva planeerimist nuppudest üleval</p>
                 </div>
             </div>
         </main>
 
-        <!-- Loading & Error States -->
+        <!-- Loading ja Error States -->
         <div class="loading hidden" id="loadingState">
             <div class="loading-spinner"></div>
             <p>Laen andmeid...</p>
@@ -146,7 +186,41 @@
         </div>
     </div>
 
-    <!-- Streak Details Modal -->
+    <!-- Export/Import -->
+    <div class="modal-overlay hidden" id="exportModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Ekspordi & Impordi 💾</h2>
+                <button class="modal-close" id="closeExportModal" aria-label="Sulge">×</button>
+            </div>
+            <div class="modal-content">
+                <div class="export-section">
+                    <h3>Ekspordi andmed</h3>
+                    <p class="section-description">Salvesta oma ülesanded varukoopiaks</p>
+                    <div class="export-buttons">
+                        <button class="btn btn-primary" id="exportJsonBtn">
+                            <span>📄 Ekspordi JSON</span>
+                        </button>
+                        <button class="btn btn-secondary" id="exportCsvBtn">
+                            <span>📊 Ekspordi CSV</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="import-section">
+                    <h3>Impordi andmed</h3>
+                    <p class="section-description">Taasta varukoopia või lisa andmeid</p>
+                    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                    <button class="btn btn-primary" id="importJsonBtn">
+                        <span>📥 Impordi JSON</span>
+                    </button>
+                    <p class="import-warning">⚠️ See lisab andmed olemasolevatele, ei asenda neid</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Streak Details -->
     <div class="modal-overlay hidden" id="streakModal">
         <div class="modal">
             <div class="modal-header">

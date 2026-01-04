@@ -7,7 +7,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // Initialize Supabase client
 let db;
 
-// Check if Supabase client is available
 try {
     if (typeof window.supabase !== 'undefined') {
         console.log('Supabase library loaded');
@@ -32,6 +31,20 @@ let streakData = {
     previousStreak: 0
 };
 
+// Sound Settings
+let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+let audioContext = null;
+
+// Quick Add Templates
+const quickAddTemplates = {
+    water: { title: 'Joo 2L vett', description: 'Hoia keha hüdreeritud', category: 'health', repeat_type: 'daily' },
+    outside: { title: 'Käi 20min väljas', description: 'Värsket õhku ja liikumist', category: 'health', repeat_type: 'daily' },
+    break: { title: 'Tee 10min pause', description: 'Puhka ja lõõgastu', category: 'rest', repeat_type: 'daily' },
+    exercise: { title: 'Treening 30min', description: 'Keha liigutamine', category: 'health', repeat_type: 'daily' },
+    meditate: { title: 'Mediteeri 10min', description: 'Rahusta mõtteid', category: 'rest', repeat_type: 'daily' },
+    sleep: { title: 'Maga 8h', description: 'Kvaliteetne uni', category: 'rest', repeat_type: 'daily' }
+};
+
 // ================================
 // DOM Elements
 // ================================
@@ -49,16 +62,219 @@ const elements = {
     streakNumber: document.getElementById('streakNumber'),
     streakDetailsBtn: document.getElementById('streakDetailsBtn'),
     streakModal: document.getElementById('streakModal'),
-    closeStreakModal: document.getElementById('closeStreakModal')
+    closeStreakModal: document.getElementById('closeStreakModal'),
+    soundToggle: document.getElementById('soundToggle'),
+    exportBtn: document.getElementById('exportBtn'),
+    exportModal: document.getElementById('exportModal'),
+    closeExportModal: document.getElementById('closeExportModal')
 };
+
+// ================================
+// Audio Functions
+// ================================
+function initAudio() {
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (error) {
+        console.log('Web Audio API not supported');
+    }
+}
+
+function playSound(type) {
+    if (!soundEnabled || !audioContext) return;
+    
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    switch(type) {
+        case 'success':
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+            break;
+        case 'complete':
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.4);
+            break;
+        case 'milestone':
+            for (let i = 0; i < 3; i++) {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                osc.frequency.value = 523.25 * (i + 1);
+                gain.gain.setValueAtTime(0.2, audioContext.currentTime + i * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.3);
+                osc.start(audioContext.currentTime + i * 0.1);
+                osc.stop(audioContext.currentTime + i * 0.1 + 0.3);
+            }
+            break;
+        case 'delete':
+            oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(200, audioContext.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+            break;
+    }
+}
+
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem('soundEnabled', soundEnabled);
+    updateSoundButton();
+    if (soundEnabled) playSound('success');
+}
+
+function updateSoundButton() {
+    const soundBtn = elements.soundToggle;
+    if (soundBtn) {
+        soundBtn.classList.toggle('muted', !soundEnabled);
+        soundBtn.querySelector('.header-btn-icon').textContent = soundEnabled ? '🔊' : '🔇';
+    }
+}
+
+// ================================
+// Export/Import Functions
+// ================================
+function exportToJSON() {
+    const dataToExport = {
+        tasks: tasks,
+        streakData: streakData,
+        exportDate: new Date().toISOString(),
+        version: '1.0'
+    };
+    
+    const dataStr = JSON.stringify(dataToExport, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `paevaplaan-backup-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    
+    URL.revokeObjectURL(url);
+    showToast('Andmed eksporditud JSON-na! 💾', 'success');
+    playSound('success');
+}
+
+function exportToCSV() {
+    const headers = ['ID', 'Pealkiri', 'Kirjeldus', 'Kategooria', 'Kordus', 'Täidetud', 'Loodud', 'Täidetud kuupäev'];
+    const rows = tasks.map(task => [
+        task.id,
+        `"${task.title.replace(/"/g, '""')}"`,
+        `"${(task.description || '').replace(/"/g, '""')}"`,
+        getCategoryLabel(task.category),
+        getRepeatLabel(task.repeat_type),
+        task.is_completed ? 'Jah' : 'Ei',
+        new Date(task.created_at).toLocaleString('et-EE'),
+        task.completed_at ? new Date(task.completed_at).toLocaleString('et-EE') : ''
+    ]);
+    
+    const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+    const BOM = '\uFEFF';
+    const dataBlob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `paevaplaan-export-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    
+    URL.revokeObjectURL(url);
+    showToast('Andmed eksporditud CSV-na! 📊', 'success');
+    playSound('success');
+}
+
+async function importFromJSON(file) {
+    try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        
+        if (!data.tasks || !Array.isArray(data.tasks)) {
+            throw new Error('Vigane JSON formaat');
+        }
+        
+        let importedCount = 0;
+        
+        for (const task of data.tasks) {
+            const exists = tasks.some(t => t.id === task.id);
+            if (!exists) {
+                try {
+                    const taskData = {
+                        title: task.title,
+                        description: task.description || null,
+                        category: task.category,
+                        repeat_type: task.repeat_type,
+                        is_completed: task.is_completed || false,
+                        completed_at: task.completed_at || null
+                    };
+                    
+                    const { data: newTask, error } = await db
+                        .from('tasks')
+                        .insert([taskData])
+                        .select();
+                    
+                    if (!error && newTask) {
+                        tasks.unshift(newTask[0]);
+                        importedCount++;
+                    }
+                } catch (error) {
+                    console.error('Error importing task:', error);
+                }
+            }
+        }
+        
+        renderTasks();
+        updateStats();
+        calculateAndUpdateStreaks();
+        saveToLocalStorage();
+        
+        showToast(`Imporditud ${importedCount} ülesannet! 📥`, 'success');
+        playSound('success');
+        hideExportModal();
+    } catch (error) {
+        console.error('Import error:', error);
+        showToast('Viga importimisel! Kontrolli faili. ❌', 'error');
+    }
+}
+
+// ================================
+// Quick Add Functions
+// ================================
+async function handleQuickAdd(templateKey) {
+    const template = quickAddTemplates[templateKey];
+    if (!template) return;
+    
+    const btn = document.querySelector(`[data-template="${templateKey}"]`);
+    btn?.classList.add('adding');
+    
+    try {
+        await addTask(template);
+        playSound('success');
+    } catch (error) {
+        console.error('Quick add error:', error);
+    } finally {
+        setTimeout(() => btn?.classList.remove('adding'), 300);
+    }
+}
 
 // ================================
 // Supabase Functions
 // ================================
-
-/**
- * Fetch all tasks from Supabase
- */
 async function fetchTasks() {
     try {
         showLoading(true);
@@ -81,34 +297,23 @@ async function fetchTasks() {
         console.error('Error fetching tasks:', error);
         showError('Andmete laadimine ebaõnnestus');
         showLoading(false);
-        
-        // Fallback to localStorage
         loadFromLocalStorage();
     }
 }
 
-/**
- * Add new task to Supabase
- */
 async function addTask(taskData) {
-    console.log('addTask called with:', taskData);
-    
-    // Check if db is initialized
     if (!db) {
-        const errorMsg = 'Supabase pole initsialiseeritud! Kontrolli API key\'d.';
+        const errorMsg = 'Supabase pole initsialiseeritud!';
         console.error(errorMsg);
         showError(errorMsg);
         throw new Error(errorMsg);
     }
     
     try {
-        console.log('Sending to Supabase...');
         const { data, error } = await db
             .from('tasks')
             .insert([taskData])
             .select();
-        
-        console.log('Supabase response:', { data, error });
         
         if (error) throw error;
         
@@ -117,22 +322,18 @@ async function addTask(taskData) {
         updateStats();
         saveToLocalStorage();
         
-        // Show success toast
-        showToast('Ülesanne lisatud!', 'success');
+        showToast('Ülesanne lisatud! ✅', 'success');
+        playSound('success');
         
-        console.log('Task added to local state');
         return data[0];
     } catch (error) {
         console.error('Error adding task:', error);
         showError('Ülesande lisamine ebaõnnestus: ' + error.message);
-        showToast('Viga ülesande lisamisel', 'error');
+        showToast('Viga ülesande lisamisel ❌', 'error');
         throw error;
     }
 }
 
-/**
- * Update task in Supabase
- */
 async function updateTask(taskId, updates) {
     try {
         const { data, error } = await db
@@ -143,7 +344,6 @@ async function updateTask(taskId, updates) {
         
         if (error) throw error;
         
-        // Update local state
         const taskIndex = tasks.findIndex(t => t.id === taskId);
         if (taskIndex !== -1) {
             tasks[taskIndex] = { ...tasks[taskIndex], ...updates };
@@ -153,7 +353,6 @@ async function updateTask(taskId, updates) {
         updateStats();
         saveToLocalStorage();
         
-        // Update streaks if task was completed
         if (updates.is_completed) {
             calculateAndUpdateStreaks();
         }
@@ -166,9 +365,6 @@ async function updateTask(taskId, updates) {
     }
 }
 
-/**
- * Delete task from Supabase
- */
 async function deleteTask(taskId) {
     try {
         const { error } = await db
@@ -184,19 +380,16 @@ async function deleteTask(taskId) {
         calculateAndUpdateStreaks();
         saveToLocalStorage();
         
-        // Show success toast
-        showToast('Ülesanne kustutatud', 'success');
+        showToast('Ülesanne kustutatud 🗑️', 'success');
+        playSound('delete');
     } catch (error) {
         console.error('Error deleting task:', error);
         showError('Ülesande kustutamine ebaõnnestus');
-        showToast('Viga kustutamisel', 'error');
+        showToast('Viga kustutamisel ❌', 'error');
         throw error;
     }
 }
 
-/**
- * Toggle task completion
- */
 async function toggleTaskCompletion(taskId) {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
@@ -208,42 +401,34 @@ async function toggleTaskCompletion(taskId) {
     
     await updateTask(taskId, updates);
     
-    // Show confetti and toast when completing
     if (updates.is_completed) {
         createConfetti();
         showToast('Tubli töö! 🎉', 'success');
+        playSound('complete');
     }
 }
 
 // ================================
 // Streak Functions
 // ================================
-
-/**
- * Calculate overall streak (consecutive days with at least 1 completed task)
- */
 function calculateOverallStreak() {
     const completedTasks = tasks.filter(t => t.is_completed && t.completed_at);
     
     if (completedTasks.length === 0) return 0;
     
-    // Get unique completion dates, sorted descending
     const completionDates = [...new Set(
         completedTasks.map(t => new Date(t.completed_at).toDateString())
     )].sort((a, b) => new Date(b) - new Date(a));
     
     if (completionDates.length === 0) return 0;
     
-    // Check if there's activity today or yesterday (to maintain streak)
     const today = new Date().toDateString();
     const yesterday = new Date(Date.now() - 86400000).toDateString();
     
-    // Streak broken if most recent activity is neither today nor yesterday
     if (completionDates[0] !== today && completionDates[0] !== yesterday) {
         return 0;
     }
     
-    // Count consecutive days
     let streak = 1;
     let currentDate = new Date(completionDates[0]);
     
@@ -263,9 +448,6 @@ function calculateOverallStreak() {
     return streak;
 }
 
-/**
- * Calculate category-specific streaks
- */
 function calculateCategoryStreaks() {
     const categories = ['health', 'productivity', 'social', 'rest', 'hobbies', 
                        'finance', 'household', 'learning', 'nutrition', 'other'];
@@ -281,7 +463,6 @@ function calculateCategoryStreaks() {
             return;
         }
         
-        // Get unique completion dates for this category
         const completionDates = [...new Set(
             categoryTasks.map(t => new Date(t.completed_at).toDateString())
         )].sort((a, b) => new Date(b) - new Date(a));
@@ -289,13 +470,11 @@ function calculateCategoryStreaks() {
         const today = new Date().toDateString();
         const yesterday = new Date(Date.now() - 86400000).toDateString();
         
-        // Check if streak is active
         if (completionDates[0] !== today && completionDates[0] !== yesterday) {
             categoryStreaks[category] = 0;
             return;
         }
         
-        // Count consecutive days
         let streak = 1;
         let currentDate = new Date(completionDates[0]);
         
@@ -318,9 +497,6 @@ function calculateCategoryStreaks() {
     return categoryStreaks;
 }
 
-/**
- * Calculate and update all streaks
- */
 function calculateAndUpdateStreaks() {
     const previousStreak = streakData.overall;
     
@@ -332,38 +508,28 @@ function calculateAndUpdateStreaks() {
     updateStreakDisplay();
     saveStreakData();
     
-    // Check for milestone achievements
     checkStreakMilestone(previousStreak, streakData.overall);
 }
 
-/**
- * Update streak display in UI
- */
 function updateStreakDisplay() {
     if (elements.streakNumber) {
         elements.streakNumber.textContent = streakData.overall;
     }
 }
 
-/**
- * Check if a streak milestone was achieved
- */
 function checkStreakMilestone(previousStreak, currentStreak) {
     const milestones = [3, 7, 14, 30, 60, 100];
     
     for (const milestone of milestones) {
         if (previousStreak < milestone && currentStreak >= milestone) {
-            // Milestone achieved!
             showMilestoneNotification(milestone);
             createMilestoneConfetti();
-            break; // Only celebrate the first milestone
+            playSound('milestone');
+            break;
         }
     }
 }
 
-/**
- * Show milestone achievement notification
- */
 function showMilestoneNotification(milestone) {
     const messages = {
         3: '3 päeva streak! Hea algus! 🔥',
@@ -377,26 +543,17 @@ function showMilestoneNotification(milestone) {
     showToast(messages[milestone] || `${milestone} päeva streak! 🔥`, 'streak');
 }
 
-/**
- * Create special confetti for milestones
- */
 function createMilestoneConfetti() {
-    // Double confetti for milestones!
     createConfetti();
     setTimeout(() => createConfetti(), 300);
 }
 
-/**
- * Render streak modal content
- */
 function renderStreakModal() {
-    // Update big streak number
     const streakNumberBig = document.getElementById('streakNumberBig');
     if (streakNumberBig) {
         streakNumberBig.textContent = streakData.overall;
     }
     
-    // Render milestones
     const milestonesGrid = document.getElementById('milestonesGrid');
     if (milestonesGrid) {
         const milestones = [
@@ -416,7 +573,6 @@ function renderStreakModal() {
         `).join('');
     }
     
-    // Render category streaks
     const categoryStreaksList = document.getElementById('categoryStreaksList');
     if (categoryStreaksList) {
         const categoryLabels = {
@@ -445,7 +601,6 @@ function renderStreakModal() {
             other: '#6b7280'
         };
         
-        // Filter out categories with 0 streak and sort by streak descending
         const activeStreaks = Object.entries(streakData.categories)
             .filter(([_, streak]) => streak > 0)
             .sort((a, b) => b[1] - a[1]);
@@ -470,34 +625,31 @@ function renderStreakModal() {
     }
 }
 
-/**
- * Show streak modal
- */
 function showStreakModal() {
     renderStreakModal();
     elements.streakModal?.classList.remove('hidden');
 }
 
-/**
- * Hide streak modal
- */
 function hideStreakModal() {
     elements.streakModal?.classList.add('hidden');
+}
+
+function showExportModal() {
+    elements.exportModal?.classList.remove('hidden');
+}
+
+function hideExportModal() {
+    elements.exportModal?.classList.add('hidden');
 }
 
 // ================================
 // UI Rendering
 // ================================
-
-/**
- * Render all tasks
- */
 function renderTasks() {
     const filteredTasks = currentFilter === 'all' 
         ? tasks 
         : tasks.filter(t => t.category === currentFilter);
     
-    // Show empty state if no tasks
     if (filteredTasks.length === 0) {
         elements.emptyState.classList.remove('hidden');
         elements.tasksList.innerHTML = '';
@@ -507,7 +659,6 @@ function renderTasks() {
     
     elements.emptyState.classList.add('hidden');
     
-    // Render tasks
     elements.tasksList.innerHTML = filteredTasks.map((task, index) => `
         <div class="task-card ${task.is_completed ? 'completed' : ''}" 
              data-category="${task.category}"
@@ -544,9 +695,6 @@ function renderTasks() {
     `).join('');
 }
 
-/**
- * Update statistics
- */
 function updateStats() {
     const today = new Date().toDateString();
     const todayTasks = tasks.filter(t => {
@@ -559,17 +707,12 @@ function updateStats() {
     elements.completedToday.textContent = completedCount;
     elements.totalToday.textContent = todayTasks.length;
     
-    // Update progress bar
     updateProgressBar();
 }
 
 // ================================
 // Event Handlers
 // ================================
-
-/**
- * Handle form toggle
- */
 elements.addTaskToggle.addEventListener('click', () => {
     const isExpanded = elements.addTaskToggle.getAttribute('aria-expanded') === 'true';
     
@@ -582,9 +725,6 @@ elements.addTaskToggle.addEventListener('click', () => {
     }
 });
 
-/**
- * Handle cancel button
- */
 elements.cancelTask.addEventListener('click', () => {
     elements.addTaskToggle.setAttribute('aria-expanded', 'false');
     elements.addTaskForm.classList.add('hidden');
@@ -592,13 +732,8 @@ elements.cancelTask.addEventListener('click', () => {
     elements.addTaskForm.reset();
 });
 
-/**
- * Handle form submission
- */
 elements.addTaskForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
-    console.log('Form submitted!');
     
     const formData = new FormData(e.target);
     const taskData = {
@@ -610,86 +745,89 @@ elements.addTaskForm.addEventListener('submit', async (e) => {
         completed_at: null
     };
     
-    console.log('Task data:', taskData);
-    
     try {
         await addTask(taskData);
         e.target.reset();
-        elements.addTaskToggle.click(); // Close form
-        console.log('Task added successfully!');
+        elements.addTaskToggle.click();
     } catch (error) {
         console.error('Form submission error:', error);
     }
 });
 
-/**
- * Handle task toggle
- */
 window.handleTaskToggle = async (taskId) => {
     await toggleTaskCompletion(taskId);
 };
 
-/**
- * Handle task delete
- */
 window.handleTaskDelete = async (taskId) => {
     if (confirm('Kas oled kindel, et soovid selle ülesande kustutada?')) {
         await deleteTask(taskId);
     }
 };
 
-/**
- * Handle filter buttons
- */
 elements.filterButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-        // Update active state
         elements.filterButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        
-        // Update filter
         currentFilter = btn.dataset.filter;
         renderTasks();
     });
 });
 
-/**
- * Handle streak details button
- */
 elements.streakDetailsBtn?.addEventListener('click', () => {
     showStreakModal();
 });
 
-/**
- * Handle close streak modal
- */
 elements.closeStreakModal?.addEventListener('click', () => {
     hideStreakModal();
 });
 
-/**
- * Handle click outside modal to close
- */
 elements.streakModal?.addEventListener('click', (e) => {
     if (e.target === elements.streakModal) {
         hideStreakModal();
     }
 });
 
+elements.soundToggle?.addEventListener('click', toggleSound);
+
+elements.exportBtn?.addEventListener('click', showExportModal);
+
+elements.closeExportModal?.addEventListener('click', hideExportModal);
+
+elements.exportModal?.addEventListener('click', (e) => {
+    if (e.target === elements.exportModal) {
+        hideExportModal();
+    }
+});
+
+document.getElementById('exportJsonBtn')?.addEventListener('click', exportToJSON);
+document.getElementById('exportCsvBtn')?.addEventListener('click', exportToCSV);
+
+document.getElementById('importJsonBtn')?.addEventListener('click', () => {
+    document.getElementById('importFileInput')?.click();
+});
+
+document.getElementById('importFileInput')?.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+        await importFromJSON(file);
+        e.target.value = '';
+    }
+});
+
+document.querySelectorAll('.quick-add-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const template = btn.dataset.template;
+        handleQuickAdd(template);
+    });
+});
+
 // ================================
 // Utility Functions
 // ================================
-
-/**
- * Show/hide loading state
- */
 function showLoading(show) {
     elements.loadingState.classList.toggle('hidden', !show);
 }
 
-/**
- * Show error message
- */
 function showError(message) {
     elements.errorState.classList.remove('hidden');
     elements.errorState.querySelector('p').textContent = message;
@@ -699,18 +837,12 @@ function showError(message) {
     }, 5000);
 }
 
-/**
- * Escape HTML to prevent XSS
- */
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-/**
- * Get category label in Estonian
- */
 function getCategoryLabel(category) {
     const labels = {
         health: 'Tervis',
@@ -727,9 +859,6 @@ function getCategoryLabel(category) {
     return labels[category] || category;
 }
 
-/**
- * Get repeat type label in Estonian
- */
 function getRepeatLabel(repeatType) {
     const labels = {
         daily: 'Iga päev',
@@ -739,9 +868,6 @@ function getRepeatLabel(repeatType) {
     return labels[repeatType] || repeatType;
 }
 
-/**
- * Show toast notification
- */
 function showToast(message, type = 'success') {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
@@ -761,15 +887,11 @@ function showToast(message, type = 'success') {
     
     container.appendChild(toast);
     
-    // Remove after animation
     setTimeout(() => {
         toast.remove();
     }, 3000);
 }
 
-/**
- * Update progress bar
- */
 function updateProgressBar() {
     const today = new Date().toDateString();
     const todayTasks = tasks.filter(t => {
@@ -787,12 +909,8 @@ function updateProgressBar() {
 }
 
 // ================================
-// LocalStorage Backup
+// LocalStorage
 // ================================
-
-/**
- * Save tasks to localStorage as backup
- */
 function saveToLocalStorage() {
     try {
         localStorage.setItem('tasks_backup', JSON.stringify(tasks));
@@ -801,9 +919,6 @@ function saveToLocalStorage() {
     }
 }
 
-/**
- * Load tasks from localStorage
- */
 function loadFromLocalStorage() {
     try {
         const backup = localStorage.getItem('tasks_backup');
@@ -818,9 +933,6 @@ function loadFromLocalStorage() {
     }
 }
 
-/**
- * Save streak data to localStorage
- */
 function saveStreakData() {
     try {
         localStorage.setItem('streak_data', JSON.stringify(streakData));
@@ -829,9 +941,6 @@ function saveStreakData() {
     }
 }
 
-/**
- * Load streak data from localStorage
- */
 function loadStreakData() {
     try {
         const data = localStorage.getItem('streak_data');
@@ -886,7 +995,6 @@ function createConfetti() {
             ctx.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size);
             ctx.restore();
             
-            // Remove if off screen
             if (piece.y > canvas.height) {
                 confetti.splice(index, 1);
             }
@@ -906,12 +1014,13 @@ function createConfetti() {
 // Keyboard Navigation
 // ================================
 document.addEventListener('keydown', (e) => {
-    // ESC to close form or modal
     if (e.key === 'Escape') {
         if (!elements.addTaskForm.classList.contains('hidden')) {
             elements.cancelTask.click();
         } else if (!elements.streakModal?.classList.contains('hidden')) {
             hideStreakModal();
+        } else if (!elements.exportModal?.classList.contains('hidden')) {
+            hideExportModal();
         }
     }
 });
@@ -922,14 +1031,12 @@ document.addEventListener('keydown', (e) => {
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = themeToggle?.querySelector('.theme-icon');
 
-// Load saved theme
 const savedTheme = localStorage.getItem('theme') || 'light';
 document.documentElement.setAttribute('data-theme', savedTheme);
 if (themeIcon) {
     themeIcon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
 }
 
-// Toggle theme
 themeToggle?.addEventListener('click', () => {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -947,41 +1054,32 @@ themeToggle?.addEventListener('click', () => {
 // ================================
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('App initializing...');
-    console.log('SUPABASE_URL:', SUPABASE_URL);
-    console.log('SUPABASE_ANON_KEY:', SUPABASE_ANON_KEY.substring(0, 20) + '...');
+    
+    // Initialize audio
+    initAudio();
+    updateSoundButton();
     
     // Load saved data
     loadStreakData();
     
-    // Check if Supabase is configured
-    if (SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY_HERE') {
-        console.error('⚠️ Supabase pole konfigureeritud! Palun lisa oma API key script.js faili.');
-        showError('Supabase pole konfigureeritud. Lisa API key script.js faili.');
-        loadFromLocalStorage(); // Use localStorage as fallback
-        return;
-    }
-    
-    // Check if db is initialized
     if (!db) {
         console.error('⚠️ Supabase client pole initsialiseeritud!');
-        showError('Supabase client pole initsialiseeritud. Kontrolli console\'i.');
+        showError('Supabase client pole initsialiseeritud.');
         loadFromLocalStorage();
         return;
     }
     
-    console.log('Supabase configured correctly, fetching tasks...');
+    console.log('Supabase configured, fetching tasks...');
     
-    // Fetch initial data
     await fetchTasks();
     
-    // Set up realtime subscription (optional, for multi-device sync)
     const subscription = db
         .channel('tasks_channel')
         .on('postgres_changes', 
             { event: '*', schema: 'public', table: 'tasks' },
             (payload) => {
                 console.log('Realtime update:', payload);
-                fetchTasks(); // Refresh when data changes
+                fetchTasks();
             }
         )
         .subscribe();
