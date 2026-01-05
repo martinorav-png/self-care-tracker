@@ -46,6 +46,98 @@ const quickAddTemplates = {
 };
 
 // ================================
+// Achievements System
+// ================================
+const achievements = [
+    {
+        id: 'first_task',
+        title: 'Esimene samm',
+        description: 'Lisa oma esimene ülesanne',
+        icon: '🎯',
+        check: (data) => data.totalTasks >= 1
+    },
+    {
+        id: 'first_complete',
+        title: 'Tehtud!',
+        description: 'Täida oma esimene ülesanne',
+        icon: '✅',
+        check: (data) => data.completedTasks >= 1
+    },
+    {
+        id: 'streak_3',
+        title: 'Sütib!',
+        description: 'Saavuta 3 päeva streak',
+        icon: '🔥',
+        check: (data) => data.currentStreak >= 3
+    },
+    {
+        id: 'streak_7',
+        title: 'Nädal täis',
+        description: 'Saavuta 7 päeva streak',
+        icon: '🔥🔥',
+        check: (data) => data.currentStreak >= 7
+    },
+    {
+        id: 'streak_30',
+        title: 'Kuu kangelane',
+        description: 'Saavuta 30 päeva streak',
+        icon: '🏆',
+        check: (data) => data.currentStreak >= 30
+    },
+    {
+        id: 'early_bird',
+        title: 'Varajane lind',
+        description: 'Täida 5 ülesannet enne kella 9 hommikul',
+        icon: '🌅',
+        check: (data) => data.earlyCompletions >= 5
+    },
+    {
+        id: 'night_owl',
+        title: 'Öökull',
+        description: 'Täida 5 ülesannet pärast kella 22',
+        icon: '🦉',
+        check: (data) => data.lateCompletions >= 5
+    },
+    {
+        id: 'productive_day',
+        title: 'Produktiivne päev',
+        description: 'Täida 10 ülesannet ühel päeval',
+        icon: '⚡',
+        check: (data) => data.maxTasksPerDay >= 10
+    },
+    {
+        id: 'all_categories',
+        title: 'Tasakaalustatud',
+        description: 'Täida vähemalt 1 ülesanne igas kategoorias',
+        icon: '🎨',
+        check: (data) => data.categoriesCompleted >= 10
+    },
+    {
+        id: 'century',
+        title: 'Saja päeva reis',
+        description: 'Täida 100 ülesannet kokku',
+        icon: '💯',
+        check: (data) => data.completedTasks >= 100
+    },
+    {
+        id: 'quick_start',
+        title: 'Kiire start',
+        description: 'Kasuta quick add nuppu 10 korda',
+        icon: '⚡',
+        check: (data) => data.quickAdds >= 10
+    },
+    {
+        id: 'organized',
+        title: 'Organiseeritud',
+        description: 'Kasuta kõiki 10 kategooriat',
+        icon: '📋',
+        check: (data) => data.categoriesUsed >= 10
+    }
+];
+
+let unlockedAchievements = JSON.parse(localStorage.getItem('unlocked_achievements') || '[]');
+
+// ================================
 // DOM Elements
 // ================================
 const elements = {
@@ -147,6 +239,159 @@ function updateSoundButton() {
 }
 
 // ================================
+// Achievement Functions
+// ================================
+function checkAchievements() {
+    const completedTasks = tasks.filter(t => t.is_completed);
+    
+    // Early bird (before 9 AM)
+    const earlyCompletions = completedTasks.filter(t => {
+        if (!t.completed_at) return false;
+        const hour = new Date(t.completed_at).getHours();
+        return hour < 9;
+    }).length;
+    
+    // Night owl (after 10 PM)
+    const lateCompletions = completedTasks.filter(t => {
+        if (!t.completed_at) return false;
+        const hour = new Date(t.completed_at).getHours();
+        return hour >= 22;
+    }).length;
+    
+    // Max tasks per day
+    const tasksByDay = {};
+    completedTasks.forEach(t => {
+        if (!t.completed_at) return;
+        const day = new Date(t.completed_at).toDateString();
+        tasksByDay[day] = (tasksByDay[day] || 0) + 1;
+    });
+    const maxTasksPerDay = Math.max(0, ...Object.values(tasksByDay));
+    
+    // Categories completed
+    const categoriesWithCompletions = new Set(completedTasks.map(t => t.category));
+    const categoriesCompleted = categoriesWithCompletions.size;
+    
+    // Categories used (including uncompleted)
+    const categoriesUsed = new Set(tasks.map(t => t.category)).size;
+    
+    // Quick adds
+    const quickAdds = parseInt(localStorage.getItem('quick_add_count') || '0');
+    
+    const data = {
+        totalTasks: tasks.length,
+        completedTasks: completedTasks.length,
+        currentStreak: streakData.overall,
+        earlyCompletions,
+        lateCompletions,
+        maxTasksPerDay,
+        categoriesCompleted,
+        categoriesUsed,
+        quickAdds
+    };
+    
+    achievements.forEach(achievement => {
+        if (!unlockedAchievements.includes(achievement.id)) {
+            if (achievement.check(data)) {
+                unlockedAchievements.push(achievement.id);
+                localStorage.setItem('unlocked_achievements', JSON.stringify(unlockedAchievements));
+                localStorage.setItem(`achievement_${achievement.id}_date`, new Date().toISOString());
+                showAchievementUnlock(achievement);
+            }
+        }
+    });
+}
+
+function showAchievementUnlock(achievement) {
+    const toast = document.getElementById('achievementToast');
+    const title = toast.querySelector('.achievement-toast-title');
+    const description = toast.querySelector('.achievement-toast-description');
+    const icon = toast.querySelector('.achievement-toast-icon');
+    
+    title.textContent = achievement.title;
+    description.textContent = achievement.description;
+    icon.textContent = achievement.icon;
+    
+    toast.classList.remove('hidden');
+    playSound('milestone');
+    createMilestoneConfetti();
+    
+    setTimeout(() => {
+        toast.classList.add('hidden');
+    }, 5000);
+}
+
+function renderAchievements() {
+    const grid = document.getElementById('achievementsGrid');
+    const unlockedCount = document.getElementById('achievementsUnlocked');
+    const totalCount = document.getElementById('achievementsTotal');
+    
+    unlockedCount.textContent = unlockedAchievements.length;
+    totalCount.textContent = achievements.length;
+    
+    grid.innerHTML = achievements.map(achievement => {
+        const isUnlocked = unlockedAchievements.includes(achievement.id);
+        const unlockedDate = isUnlocked ? localStorage.getItem(`achievement_${achievement.id}_date`) : null;
+        
+        return `
+            <div class="achievement-card ${isUnlocked ? 'unlocked' : 'locked'}">
+                <span class="achievement-icon">${achievement.icon}</span>
+                <h4 class="achievement-title">${achievement.title}</h4>
+                <p class="achievement-description">${achievement.description}</p>
+                ${isUnlocked && unlockedDate ? `<p class="achievement-unlocked-date">Avatud: ${new Date(unlockedDate).toLocaleDateString('et-EE')}</p>` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+// ================================
+// Heatmap Functions
+// ================================
+function renderHeatmap() {
+    const container = document.getElementById('heatmapContainer');
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - 84); // 12 weeks ago
+    
+    // Count tasks per day
+    const tasksByDay = {};
+    tasks.filter(t => t.is_completed && t.completed_at).forEach(task => {
+        const day = new Date(task.completed_at).toDateString();
+        tasksByDay[day] = (tasksByDay[day] || 0) + 1;
+    });
+    
+    // Create grid
+    const grid = document.createElement('div');
+    grid.className = 'heatmap-grid';
+    
+    // Generate cells for past 12 weeks (84 days)
+    for (let i = 0; i < 84; i++) {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        const dateStr = date.toDateString();
+        const count = tasksByDay[dateStr] || 0;
+        
+        // Determine level (0-4)
+        let level = 0;
+        if (count >= 1) level = 1;
+        if (count >= 3) level = 2;
+        if (count >= 5) level = 3;
+        if (count >= 8) level = 4;
+        
+        const cell = document.createElement('div');
+        cell.className = 'heatmap-cell';
+        cell.setAttribute('data-level', level);
+        cell.setAttribute('data-count', count);
+        cell.setAttribute('data-plural', count === 1 ? '' : 'i');
+        cell.setAttribute('data-date', date.toLocaleDateString('et-EE'));
+        
+        grid.appendChild(cell);
+    }
+    
+    container.innerHTML = '';
+    container.appendChild(grid);
+}
+
+// ================================
 // Export/Import Functions
 // ================================
 function exportToJSON() {
@@ -242,6 +487,7 @@ async function importFromJSON(file) {
         updateStats();
         calculateAndUpdateStreaks();
         saveToLocalStorage();
+        checkAchievements();
         
         showToast(`Imporditud ${importedCount} ülesannet! 📥`, 'success');
         playSound('success');
@@ -249,6 +495,71 @@ async function importFromJSON(file) {
     } catch (error) {
         console.error('Import error:', error);
         showToast('Viga importimisel! Kontrolli faili. ❌', 'error');
+    }
+}
+
+// ================================
+// Reset All Data
+// ================================
+async function resetAllData() {
+    const confirmation = confirm(
+        '⚠️ HOIATUS!\n\n' +
+        'See KUSTUTAB:\n' +
+        '• Kõik task\'id Supabase\'ist\n' +
+        '• Kõik achievement\'id\n' +
+        '• Kõik streak\'id\n' +
+        '• Kogu statistika\n\n' +
+        'Kas oled KINDEL?'
+    );
+    
+    if (!confirmation) return;
+    
+    const doubleCheck = confirm('Viimane kinnitus! Kas TÕESTI tahad KÕIK kustutada?');
+    
+    if (!doubleCheck) return;
+    
+    try {
+        showToast('Kustutan andmeid... ⏳', 'success');
+        
+        // 1. Delete all tasks from Supabase
+        if (db) {
+            const { error } = await db
+                .from('tasks')
+                .delete()
+                .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+            
+            if (error) {
+                console.error('Supabase delete error:', error);
+            }
+        }
+        
+        // 2. Clear all localStorage
+        localStorage.removeItem('tasks_backup');
+        localStorage.removeItem('streak_data');
+        localStorage.removeItem('unlocked_achievements');
+        localStorage.removeItem('quick_add_count');
+        
+        // Clear all achievement dates
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('achievement_')) {
+                keysToRemove.push(key);
+            }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        showToast('Kõik andmed kustutatud! Laen lehe uuesti... 🔄', 'success');
+        playSound('success');
+        
+        // 3. Reload page after 2 seconds
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Reset error:', error);
+        showToast('Viga resetimisel! ❌', 'error');
     }
 }
 
@@ -265,6 +576,11 @@ async function handleQuickAdd(templateKey) {
     try {
         await addTask(template);
         playSound('success');
+        
+        // Track quick adds
+        const currentCount = parseInt(localStorage.getItem('quick_add_count') || '0');
+        localStorage.setItem('quick_add_count', currentCount + 1);
+        checkAchievements();
     } catch (error) {
         console.error('Quick add error:', error);
     } finally {
@@ -290,6 +606,7 @@ async function fetchTasks() {
         renderTasks();
         updateStats();
         calculateAndUpdateStreaks();
+        checkAchievements();
         
         showLoading(false);
         return data;
@@ -321,6 +638,7 @@ async function addTask(taskData) {
         renderTasks();
         updateStats();
         saveToLocalStorage();
+        checkAchievements();
         
         showToast('Ülesanne lisatud! ✅', 'success');
         playSound('success');
@@ -355,6 +673,7 @@ async function updateTask(taskId, updates) {
         
         if (updates.is_completed) {
             calculateAndUpdateStreaks();
+            checkAchievements();
         }
         
         return data[0];
@@ -379,6 +698,7 @@ async function deleteTask(taskId) {
         updateStats();
         calculateAndUpdateStreaks();
         saveToLocalStorage();
+        checkAchievements();
         
         showToast('Ülesanne kustutatud 🗑️', 'success');
         playSound('delete');
@@ -628,18 +948,39 @@ function renderStreakModal() {
 function showStreakModal() {
     renderStreakModal();
     elements.streakModal?.classList.remove('hidden');
+    document.body.classList.add('modal-open');
 }
 
 function hideStreakModal() {
     elements.streakModal?.classList.add('hidden');
+    document.body.classList.remove('modal-open');
 }
 
 function showExportModal() {
     elements.exportModal?.classList.remove('hidden');
+    document.body.classList.add('modal-open');
 }
 
 function hideExportModal() {
     elements.exportModal?.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+}
+
+function showHeatmapModal() {
+    renderHeatmap();
+    document.getElementById('heatmapModal')?.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+}
+
+function showAchievementsModal() {
+    renderAchievements();
+    document.getElementById('achievementsModal')?.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+}
+
+function showKeyboardModal() {
+    document.getElementById('keyboardModal')?.classList.remove('hidden');
+    document.body.classList.add('modal-open');
 }
 
 // ================================
@@ -814,11 +1155,102 @@ document.getElementById('importFileInput')?.addEventListener('change', async (e)
     }
 });
 
+document.getElementById('resetAllBtn')?.addEventListener('click', resetAllData);
+
 document.querySelectorAll('.quick-add-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const template = btn.dataset.template;
         handleQuickAdd(template);
     });
+});
+
+// New modal event listeners
+document.getElementById('heatmapBtn')?.addEventListener('click', showHeatmapModal);
+document.getElementById('closeHeatmapModal')?.addEventListener('click', () => {
+    document.getElementById('heatmapModal')?.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+});
+
+document.getElementById('achievementsBtn')?.addEventListener('click', showAchievementsModal);
+document.getElementById('closeAchievementsModal')?.addEventListener('click', () => {
+    document.getElementById('achievementsModal')?.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+});
+
+document.getElementById('keyboardBtn')?.addEventListener('click', showKeyboardModal);
+document.getElementById('closeKeyboardModal')?.addEventListener('click', () => {
+    document.getElementById('keyboardModal')?.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+});
+
+// ================================
+// Keyboard Shortcuts
+// ================================
+document.addEventListener('keydown', (e) => {
+    // Don't trigger shortcuts when typing in input/textarea
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+    }
+    
+    const key = e.key.toLowerCase();
+    
+    switch(key) {
+        case '?':
+            e.preventDefault();
+            showKeyboardModal();
+            break;
+        case 'escape':
+            // Close all modals
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.classList.add('hidden');
+            });
+            document.body.classList.remove('modal-open');
+            if (!elements.addTaskForm?.classList.contains('hidden')) {
+                elements.cancelTask?.click();
+            }
+            break;
+        case 'n':
+            e.preventDefault();
+            if (elements.addTaskToggle) {
+                elements.addTaskToggle.click();
+            }
+            break;
+        case 's':
+            e.preventDefault();
+            showStreakModal();
+            break;
+        case 'h':
+            e.preventDefault();
+            showHeatmapModal();
+            break;
+        case 'a':
+            e.preventDefault();
+            showAchievementsModal();
+            break;
+        case 'd':
+            e.preventDefault();
+            document.getElementById('themeToggle')?.click();
+            break;
+        case 'm':
+            e.preventDefault();
+            toggleSound();
+            break;
+        case 'e':
+            e.preventDefault();
+            showExportModal();
+            break;
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+            e.preventDefault();
+            const templates = ['water', 'outside', 'break', 'exercise', 'meditate', 'sleep'];
+            const templateKey = templates[parseInt(key) - 1];
+            handleQuickAdd(templateKey);
+            break;
+    }
 });
 
 // ================================
@@ -927,6 +1359,7 @@ function loadFromLocalStorage() {
             renderTasks();
             updateStats();
             calculateAndUpdateStreaks();
+            checkAchievements();
         }
     } catch (error) {
         console.error('LocalStorage load failed:', error);
@@ -1009,21 +1442,6 @@ function createConfetti() {
     
     updateConfetti();
 }
-
-// ================================
-// Keyboard Navigation
-// ================================
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        if (!elements.addTaskForm.classList.contains('hidden')) {
-            elements.cancelTask.click();
-        } else if (!elements.streakModal?.classList.contains('hidden')) {
-            hideStreakModal();
-        } else if (!elements.exportModal?.classList.contains('hidden')) {
-            hideExportModal();
-        }
-    }
-});
 
 // ================================
 // Dark Mode

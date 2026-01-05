@@ -11,6 +11,9 @@
 </head>
 
 <body>
+    <!-- Skip to Main Content -->
+    <a href="#main-content" class="skip-link">Hüppa põhisisu juurde</a>
+
     <div class="container">
         <!-- Header -->
         <header class="header">
@@ -18,6 +21,16 @@
                 <h1 class="title">Päevaplaan</h1>
                 <p class="subtitle">Hoolitse enda eest, samm korraga</p>
                 <div class="header-actions">
+                    <button class="header-btn" id="achievementsBtn" aria-label="Vaata saavutusi" title="Saavutused">
+                        <span class="header-btn-icon">🏆</span>
+                    </button>
+                    <button class="header-btn" id="heatmapBtn" aria-label="Vaata aktiivsuse kalendrit" title="Kalender">
+                        <span class="header-btn-icon">📅</span>
+                    </button>
+                    <button class="header-btn" id="keyboardBtn" aria-label="Vaata klaviatuuri kiirklahve"
+                        title="Kiirklahvid">
+                        <span class="header-btn-icon">⌨️</span>
+                    </button>
                     <button class="header-btn" id="soundToggle" aria-label="Helide sisse/välja lülitamine"
                         title="Helid">
                         <span class="header-btn-icon">🔊</span>
@@ -124,7 +137,7 @@
                             <option value="productivity">Produktiivsus</option>
                             <option value="social">Sotsiaalne</option>
                             <option value="rest">Puhkus</option>
-                            <option value="hobbies">Hobid</option>
+                            <option value="hobbies">Hobbid</option>
                             <option value="finance">Rahandus</option>
                             <option value="household">Kodutööd</option>
                             <option value="learning">Õppimine</option>
@@ -157,7 +170,7 @@
             <button class="filter-btn" data-filter="productivity">Produktiivsus</button>
             <button class="filter-btn" data-filter="social">Sotsiaalne</button>
             <button class="filter-btn" data-filter="rest">Puhkus</button>
-            <button class="filter-btn" data-filter="hobbies">Hobid</button>
+            <button class="filter-btn" data-filter="hobbies">Hobbid</button>
             <button class="filter-btn" data-filter="finance">Rahandus</button>
             <button class="filter-btn" data-filter="household">Kodutööd</button>
             <button class="filter-btn" data-filter="learning">Õppimine</button>
@@ -165,7 +178,7 @@
         </div>
 
         <!-- Tasks List -->
-        <main class="tasks-container">
+        <main class="tasks-container" id="main-content">
             <div class="tasks-list" id="tasksList" role="list">
                 <!-- Tasks will be rendered here -->
                 <div class="empty-state" id="emptyState">
@@ -175,7 +188,7 @@
             </div>
         </main>
 
-        <!-- Loading ja Error States -->
+        <!-- Loading & Error States -->
         <div class="loading hidden" id="loadingState">
             <div class="loading-spinner"></div>
             <p>Laen andmeid...</p>
@@ -186,9 +199,116 @@
         </div>
     </div>
 
-    <!-- Export/Import -->
-    <div class="modal-overlay hidden" id="exportModal">
+    <!-- Heatmap Modal -->
+    <div class="modal-overlay hidden" id="heatmapModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h2>Aktiivsuse kalender 📅</h2>
+                <button class="modal-close" id="closeHeatmapModal" aria-label="Sulge">×</button>
+            </div>
+            <div class="modal-content">
+                <p class="modal-description">Sinu aktiivsus viimase 12 nädala jooksul. Tumedam värv = rohkem ülesandeid
+                    täidetud.</p>
+                <div class="heatmap-container" id="heatmapContainer">
+                    <!-- Heatmap will be rendered here -->
+                </div>
+                <div class="heatmap-legend">
+                    <span class="legend-label">Vähem</span>
+                    <div class="legend-squares">
+                        <div class="legend-square" data-level="0"></div>
+                        <div class="legend-square" data-level="1"></div>
+                        <div class="legend-square" data-level="2"></div>
+                        <div class="legend-square" data-level="3"></div>
+                        <div class="legend-square" data-level="4"></div>
+                    </div>
+                    <span class="legend-label">Rohkem</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievements Modal -->
+    <div class="modal-overlay hidden" id="achievementsModal">
+        <div class="modal modal-large modal-scrollable">
+            <div class="modal-header">
+                <h2>Saavutused 🏆</h2>
+                <button class="modal-close" id="closeAchievementsModal" aria-label="Sulge">×</button>
+            </div>
+            <div class="modal-content">
+                <div class="achievements-stats">
+                    <div class="achievement-stat">
+                        <span class="achievement-stat-value" id="achievementsUnlocked">0</span>
+                        <span class="achievement-stat-label">avatud</span>
+                    </div>
+                    <div class="achievement-stat">
+                        <span class="achievement-stat-value" id="achievementsTotal">0</span>
+                        <span class="achievement-stat-label">kokku</span>
+                    </div>
+                </div>
+                <div class="achievements-grid" id="achievementsGrid">
+                    <!-- Achievements will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="modal-overlay hidden" id="keyboardModal">
         <div class="modal">
+            <div class="modal-header">
+                <h2>Kiirklahvid ⌨️</h2>
+                <button class="modal-close" id="closeKeyboardModal" aria-label="Sulge">×</button>
+            </div>
+            <div class="modal-content">
+                <div class="shortcuts-list">
+                    <div class="shortcut-item">
+                        <kbd class="kbd">?</kbd>
+                        <span>Näita kiirklahve</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd class="kbd">Esc</kbd>
+                        <span>Sulge modal / tühista vorm</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd class="kbd">N</kbd>
+                        <span>Lisa uus ülesanne</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd class="kbd">S</kbd>
+                        <span>Vaata streak detaile</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd class="kbd">H</kbd>
+                        <span>Ava heatmap kalender</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd class="kbd">A</kbd>
+                        <span>Vaata saavutusi</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd class="kbd">D</kbd>
+                        <span>Lülita dark mode</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd class="kbd">M</kbd>
+                        <span>Lülita helid sisse/välja</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd class="kbd">E</kbd>
+                        <span>Ava eksport/import</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd class="kbd">1-6</kbd>
+                        <span>Lisa quick add task (1=vesi, 2=väljas, jne)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export/Import Modal -->
+    <div class="modal-overlay hidden" id="exportModal">
+        <div class="modal modal-scrollable">
             <div class="modal-header">
                 <h2>Ekspordi & Impordi 💾</h2>
                 <button class="modal-close" id="closeExportModal" aria-label="Sulge">×</button>
@@ -216,13 +336,23 @@
                     </button>
                     <p class="import-warning">⚠️ See lisab andmed olemasolevatele, ei asenda neid</p>
                 </div>
+
+                <div class="reset-section">
+                    <h3>⚠️ Reset andmed</h3>
+                    <p class="section-description reset-warning">HOIATUS: See kustutab KÕIK task'id, achievement'id ja
+                        statistika!</p>
+                    <button class="btn btn-danger" id="resetAllBtn">
+                        <span>🔄 Reset kõik andmed</span>
+                    </button>
+                    <p class="reset-info">Kasulik demo/esitluse jaoks. Andmeid ei saa tagasi!</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Streak Details -->
+    <!-- Streak Details Modal -->
     <div class="modal-overlay hidden" id="streakModal">
-        <div class="modal">
+        <div class="modal modal-scrollable">
             <div class="modal-header">
                 <h2>Sinu Streak'd 🔥</h2>
                 <button class="modal-close" id="closeStreakModal" aria-label="Sulge">×</button>
@@ -249,6 +379,17 @@
                         <!-- Category streaks will be rendered here -->
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement Unlock Toast -->
+    <div class="achievement-toast hidden" id="achievementToast">
+        <div class="achievement-toast-content">
+            <span class="achievement-toast-icon">🏆</span>
+            <div class="achievement-toast-text">
+                <strong class="achievement-toast-title"></strong>
+                <span class="achievement-toast-description"></span>
             </div>
         </div>
     </div>
