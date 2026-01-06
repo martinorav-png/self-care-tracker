@@ -1,0 +1,252 @@
+/* ================================
+   3D PLANT CONTAINER
+   ================================ */
+
+.plant-3d-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 2px solid #86efac;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(134, 239, 172, 0.2),
+                inset 0 2px 4px rgba(255, 255, 255, 0.5);
+    cursor: grab;
+}
+
+.plant-3d-container:active {
+    cursor: grabbing;
+}
+
+.plant-3d-container canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+[data-theme="dark"] .plant-3d-container {
+    background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+    border-color: #4ade80;
+    box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3),
+                inset 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+/* Plant info card */
+.plant-info {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #166534;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .plant-info {
+    background: rgba(20, 83, 45, 0.95);
+    color: #86efac;
+}
+
+/* Growth stage indicator */
+.growth-stage {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.growth-stage-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+/* Plant section in header */
+.plant-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-base);
+}
+
+.plant-section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.plant-instructions {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    text-align: center;
+    margin-top: 8px;
+}
+
+/* Compact version for header */
+.plant-3d-container.compact {
+    width: 150px;
+    height: 150px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .plant-3d-container {
+        width: 180px;
+        height: 180px;
+    }
+    
+    .plant-3d-container.compact {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .plant-info {
+        font-size: 0.7rem;
+        padding: 4px 10px;
+    }
+}
+
+/* Loading state */
+.plant-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+[data-theme="dark"] .plant-loading {
+    background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+}
+
+.plant-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(134, 239, 172, 0.3);
+    border-top-color: #86efac;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Shine effect on growth */
+@keyframes plantGrowShine {
+    0% {
+        box-shadow: 0 4px 12px rgba(134, 239, 172, 0.2);
+    }
+    50% {
+        box-shadow: 0 8px 24px rgba(134, 239, 172, 0.6),
+                    0 0 40px rgba(134, 239, 172, 0.4);
+    }
+    100% {
+        box-shadow: 0 4px 12px rgba(134, 239, 172, 0.2);
+    }
+}
+
+.plant-3d-container.growing {
+    animation: plantGrowShine 2s ease-in-out;
+}
+
+/* Demo button */
+.plant-demo-btn {
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin-left: 8px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    vertical-align: middle;
+}
+
+.plant-demo-btn:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    transform: scale(1.1);
+}
+
+.plant-demo-btn:active {
+    transform: scale(0.95);
+}
+
+/* Demo mode indicator */
+.plant-section.demo-mode .plant-section-title::after {
+    content: ' (DEMO)';
+    font-size: 0.7rem;
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+/* Ensure plant-info is above canvas */
+.plant-info {
+    z-index: 10 !important;
+}
+
+.plant-3d-container canvas {
+    position: relative;
+    z-index: 1;
+}
+
+/* Demo controls */
+.demo-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px;
+    background: rgba(124, 58, 237, 0.1);
+    border-radius: 8px;
+    border: 1px solid var(--color-accent);
+}
+
+.demo-nav-btn {
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+
+.demo-nav-btn:hover {
+    background: var(--color-accent-light);
+    transform: scale(1.05);
+}
+
+.demo-nav-btn:active {
+    transform: scale(0.95);
+}
+
+.demo-stage-info {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text);
+    padding: 0 8px;
+}
+
+[data-theme="dark"] .demo-controls {
+    background: rgba(124, 58, 237, 0.2);
+}

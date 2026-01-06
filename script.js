@@ -30,6 +30,7 @@ let streakData = {
     lastUpdate: null,
     previousStreak: 0
 };
+window.streakData = streakData; // Make globally accessible from start
 
 // Sound Settings
 let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
@@ -833,8 +834,13 @@ function calculateAndUpdateStreaks() {
     streakData.lastUpdate = new Date().toISOString();
     streakData.previousStreak = previousStreak;
     
+    window.streakData = streakData; // Make globally accessible
+    
     updateStreakDisplay();
     saveStreakData();
+    
+    // Update 3D plant
+    updatePlantWithStreak(streakData.overall);
     
     checkStreakMilestone(previousStreak, streakData.overall);
 }
@@ -1433,6 +1439,7 @@ function loadStreakData() {
         const data = localStorage.getItem('streak_data');
         if (data) {
             streakData = JSON.parse(data);
+            window.streakData = streakData; // Make globally accessible
             updateStreakDisplay();
         }
     } catch (error) {
@@ -1558,3 +1565,97 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     console.log('App initialized successfully!');
 });
+
+// ================================
+// 3D PLANT INTEGRATION
+// ================================
+let plant3D = null;
+
+function initPlant() {
+    // Wait for Three.js to be loaded
+    if (typeof THREE === 'undefined') {
+        console.log('⏳ Waiting for Three.js...');
+        setTimeout(initPlant, 100);
+        return;
+    }
+
+    const currentStreak = streakData.overall || 0;
+    
+    try {
+        plant3D = new Plant3D('plant3dContainer', currentStreak);
+        window.plant3D = plant3D; // Make globally accessible for demo mode
+        updatePlantStageLabel(currentStreak);
+        console.log('🌱 3D Plant initialized with streak:', currentStreak);
+    } catch (error) {
+        console.error('Failed to initialize 3D plant:', error);
+    }
+}
+
+function updatePlantStageLabel(streak) {
+    const stageElement = document.getElementById('plantStage');
+    if (!stageElement) return;
+
+    let icon, label;
+    
+    if (streak === 0) {
+        icon = '🌰';
+        label = 'Seeme';
+    } else if (streak <= 3) {
+        icon = '🌱';
+        label = 'Idand';
+    } else if (streak <= 7) {
+        icon = '🪴';
+        label = 'Noor taim';
+    } else if (streak <= 14) {
+        icon = '🌿';
+        label = 'Kasvab';
+    } else if (streak <= 29) {
+        icon = '🌳';
+        label = 'Tugev taim';
+    } else if (streak <= 59) {
+        icon = '🌸';
+        label = 'Pungad';
+    } else {
+        icon = '🌺';
+        label = 'Täisõis!';
+    }
+
+    stageElement.innerHTML = `
+        <span class="growth-stage-icon">${icon}</span>
+        <span>${label}</span>
+    `;
+}
+
+function updatePlantWithStreak(newStreak) {
+    if (plant3D) {
+        const oldStage = plant3D.getGrowthStage(plant3D.streak);
+        const newStage = plant3D.getGrowthStage(newStreak);
+        
+        plant3D.updateStreak(newStreak);
+        updatePlantStageLabel(newStreak);
+        
+        // Add shine effect if grew to new stage
+        if (newStage > oldStage) {
+            const container = document.getElementById('plant3dContainer');
+            if (container) {
+                container.classList.add('growing');
+                setTimeout(() => {
+                    container.classList.remove('growing');
+                }, 2000);
+            }
+            
+            // Show toast notification
+            showToast(`🌱 Sinu taim kasvas! (${getStageLabel(newStage)})`, 'success');
+        }
+    }
+}
+
+function getStageLabel(stage) {
+    const labels = ['Seeme', 'Idand', 'Noor taim', 'Kasvab', 'Tugev taim', 'Pungad', 'Täisõis'];
+    return labels[stage] || 'Taim';
+}
+
+// Export plant functions globally for plant-3d.js
+window.initPlant = initPlant;
+window.updatePlantWithStreak = updatePlantWithStreak;
+window.updatePlantStageLabel = updatePlantStageLabel;

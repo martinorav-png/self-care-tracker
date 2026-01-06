@@ -7,6 +7,7 @@
     <title>Päevaplaan · Self-Care Tracker</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="music-player.css">
+    <link rel="stylesheet" href="plant-3d.css">
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -57,6 +58,30 @@
                 <button class="streak-details-btn" id="streakDetailsBtn" aria-label="Vaata streak detaile">
                     <span>Detailid</span>
                 </button>
+            </div>
+
+            <!-- 3D Growing Plant -->
+            <div class="plant-section">
+                <div class="plant-section-title">
+                    <span>🌱</span>
+                    <span>Sinu Taim</span>
+                </div>
+                <div class="plant-3d-container compact" id="plant3dContainer">
+                    <div class="plant-loading">
+                        <div class="plant-loading-spinner"></div>
+                    </div>
+                    <!-- Info moved INSIDE container for proper z-index -->
+                    <div class="plant-info">
+                        <div class="growth-stage" id="plantStage">
+                            <span class="growth-stage-icon">🌰</span>
+                            <span>Seeme</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="plant-instructions">
+                    Lohista, et pöörata · Kasvab streakiga!
+                    <button class="plant-demo-btn" id="plantDemoBtn" title="Demo mode">🎮</button>
+                </div>
             </div>
 
             <div class="stats">
@@ -426,10 +451,14 @@
     <!-- Toast Notifications -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Three.js (must load first!) -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
     <!-- Animation Pack -->
     <script src="animations.js"></script>
     <script src="script.js"></script>
     <script src="music-player.js"></script>
+    <script src="plant-3d.js"></script>
 </body>
 
 </html>
