@@ -725,6 +725,14 @@ async function toggleTaskCompletion(taskId) {
         createConfetti();
         showToast('Tubli töö! 🎉', 'success');
         playSound('complete');
+        
+        // Add sparkle effect if AnimationPack is available
+        if (window.AnimationPack) {
+            const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+            if (taskElement) {
+                window.AnimationPack.createSparkles(taskElement, 8);
+            }
+        }
     }
 }
 
@@ -833,7 +841,23 @@ function calculateAndUpdateStreaks() {
 
 function updateStreakDisplay() {
     if (elements.streakNumber) {
-        elements.streakNumber.textContent = streakData.overall;
+        // Animate streak number if AnimationPack is available
+        if (window.AnimationPack) {
+            const currentStreak = parseInt(elements.streakNumber.textContent) || 0;
+            if (currentStreak !== streakData.overall) {
+                window.AnimationPack.animateNumber(elements.streakNumber, streakData.overall, 800);
+                
+                // Add pulse animation to streak badge
+                const streakBadge = document.querySelector('.streak-badge');
+                if (streakBadge) {
+                    window.AnimationPack.pulseElement(streakBadge);
+                }
+            } else {
+                elements.streakNumber.textContent = streakData.overall;
+            }
+        } else {
+            elements.streakNumber.textContent = streakData.overall;
+        }
     }
 }
 
@@ -845,6 +869,18 @@ function checkStreakMilestone(previousStreak, currentStreak) {
             showMilestoneNotification(milestone);
             createMilestoneConfetti();
             playSound('milestone');
+            
+            // Add particle burst effect if AnimationPack is available
+            if (window.AnimationPack) {
+                const streakBadge = document.querySelector('.streak-badge');
+                if (streakBadge) {
+                    const rect = streakBadge.getBoundingClientRect();
+                    const x = rect.left + rect.width / 2;
+                    const y = rect.top + rect.height / 2;
+                    window.AnimationPack.particleBurst(x, y, '#ff6b35', 20);
+                }
+            }
+            
             break;
         }
     }
@@ -1045,8 +1081,26 @@ function updateStats() {
     
     const completedCount = todayTasks.filter(t => t.is_completed).length;
     
-    elements.completedToday.textContent = completedCount;
-    elements.totalToday.textContent = todayTasks.length;
+    // Animate numbers if AnimationPack is available
+    if (window.AnimationPack) {
+        const currentCompleted = parseInt(elements.completedToday.textContent) || 0;
+        const currentTotal = parseInt(elements.totalToday.textContent) || 0;
+        
+        if (currentCompleted !== completedCount) {
+            window.AnimationPack.animateNumber(elements.completedToday, completedCount, 500);
+        } else {
+            elements.completedToday.textContent = completedCount;
+        }
+        
+        if (currentTotal !== todayTasks.length) {
+            window.AnimationPack.animateNumber(elements.totalToday, todayTasks.length, 500);
+        } else {
+            elements.totalToday.textContent = todayTasks.length;
+        }
+    } else {
+        elements.completedToday.textContent = completedCount;
+        elements.totalToday.textContent = todayTasks.length;
+    }
     
     updateProgressBar();
 }

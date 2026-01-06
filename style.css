@@ -684,17 +684,22 @@ body {
     display: flex;
     gap: var(--space-xs);
     margin-bottom: var(--space-lg);
-    padding-bottom: var(--space-md);
+    padding: var(--space-sm) 0 var(--space-md) 0; /* Increased top padding to 1rem */
     border-bottom: 1px solid var(--color-border);
     overflow-x: auto;
-    animation: fadeInUp var(--transition-slow) ease-out 300ms backwards;
+    overflow-y: visible; /* Allow buttons to expand vertically */
+    /* animation: fadeInUp var(--transition-slow) ease-out 300ms backwards; */
 }
 
 .filter-btn {
-    padding: 0.5rem 1rem;
+    display: inline-flex; /* Change to flex for proper centering */
+    align-items: center; /* Vertical center */
+    justify-content: center; /* Horizontal center */
+    padding: 0.5rem 1rem; /* Back to original padding */
     font-family: inherit;
     font-size: 0.75rem;
     font-weight: 500;
+    line-height: 1; /* Reset line-height to 1 */
     color: var(--color-text-secondary);
     background: transparent;
     border: 1px solid var(--color-border);
@@ -1745,3 +1750,464 @@ body.modal-open {
     color: var(--color-text-secondary);
     font-style: italic;
 }
+/* ================================
+   ANIMATION PACK
+   Ultimate smooth animations
+   ================================ */
+
+/* ================================
+   1. RIPPLE EFFECT
+   ================================ */
+.ripple-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    transform: scale(0);
+    animation: ripple-animation 0.6s ease-out;
+    pointer-events: none;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+[data-theme="dark"] .ripple {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ================================
+   2. GLASSMORPHISM
+   ================================ */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .glass-effect {
+    background: rgba(30, 30, 30, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    opacity: 0;
+    animation: fadeIn 0.3s ease-out forwards;
+    pointer-events: none; /* IMPORTANT: Don't block clicks! */
+}
+
+/* ================================
+   3. ANIMATED NUMBERS (CSS support)
+   ================================ */
+.animate-number {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.animate-number.counting {
+    animation: numberPulse 0.5s ease-out;
+}
+
+@keyframes numberPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+        color: var(--color-accent);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* ================================
+   4. SCROLL ANIMATIONS
+   ================================ */
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.fade-in-left {
+    opacity: 0;
+    transform: translateX(-30px);
+    animation: fadeInLeft 0.6s ease-out forwards;
+}
+
+.fade-in-right {
+    opacity: 0;
+    transform: translateX(30px);
+    animation: fadeInRight 0.6s ease-out forwards;
+}
+
+.scale-in {
+    opacity: 0;
+    transform: scale(0.8);
+    animation: scaleIn 0.5s ease-out forwards;
+}
+
+/* Stagger delays for multiple elements */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ================================
+   5. BUTTON HOVER EFFECTS
+   ================================ */
+.btn-hover-lift {
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.btn-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-hover-lift:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-hover-bounce {
+    transition: transform var(--transition-fast);
+}
+
+.btn-hover-bounce:hover {
+    animation: gentleBounce 0.5s ease;
+}
+
+@keyframes gentleBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+.btn-hover-glow {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-hover-glow::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-hover-glow:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* ================================
+   6. MICRO-INTERACTIONS
+   ================================ */
+
+/* Checkbox animation */
+.checkbox-wrapper {
+    position: relative;
+    cursor: pointer;
+}
+
+.checkbox-animated {
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-surface);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.checkbox-animated:checked {
+    background: var(--color-success);
+    border-color: var(--color-success);
+    animation: checkboxPop 0.3s ease;
+}
+
+.checkbox-animated:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    color: white;
+    font-weight: bold;
+    animation: checkmarkAppear 0.3s ease 0.1s forwards;
+}
+
+@keyframes checkboxPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+@keyframes checkmarkAppear {
+    to {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Floating animation */
+.float-animation {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Pulse animation */
+.pulse-animation {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+/* Shake animation for errors */
+.shake-animation {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* Glow pulse */
+.glow-pulse {
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(124, 58, 237, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(124, 58, 237, 0.6), 0 0 30px rgba(124, 58, 237, 0.4);
+    }
+}
+
+/* ================================
+   7. LOADING ANIMATIONS
+   ================================ */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--color-border) 0%,
+        rgba(255, 255, 255, 0.5) 50%,
+        var(--color-border) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* ================================
+   8. PARTICLE EFFECTS (CSS)
+   ================================ */
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--color-accent);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: sparkleFloat 1s ease-out forwards;
+}
+
+@keyframes sparkleFloat {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-50px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* ================================
+   9. SMOOTH TRANSITIONS
+   ================================ */
+.smooth-all {
+    transition: all var(--transition-base);
+}
+
+.smooth-transform {
+    transition: transform var(--transition-base);
+}
+
+.smooth-opacity {
+    transition: opacity var(--transition-base);
+}
+
+.smooth-colors {
+    transition: background-color var(--transition-base), 
+                color var(--transition-base),
+                border-color var(--transition-base);
+}
+
+/* ================================
+   10. ENTRANCE ANIMATIONS
+   ================================ */
+@keyframes slideInFromBottom {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromTop {
+    from {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes rotateIn {
+    from {
+        transform: rotate(-180deg) scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: rotate(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Apply entrance animations */
+.slide-in-bottom {
+    animation: slideInFromBottom 0.5s ease-out;
+}
+
+.slide-in-top {
+    animation: slideInFromTop 0.5s ease-out;
+}
+
+.zoom-in {
+    animation: zoomIn 0.5s ease-out;
+}
+
+.rotate-in {
+    animation: rotateIn 0.6s ease-out;
+}
+

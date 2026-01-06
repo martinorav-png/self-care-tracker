@@ -1,0 +1,210 @@
+/* ================================
+   BALATRO MUSIC PLAYER
+   ================================ */
+
+.music-player {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid #7c3aed;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(124, 58, 237, 0.3), 
+                0 0 0 1px rgba(124, 58, 237, 0.1);
+    z-index: 9999;
+    min-width: 280px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.music-player:hover {
+    box-shadow: 0 12px 40px rgba(124, 58, 237, 0.4),
+                0 0 0 1px rgba(124, 58, 237, 0.2);
+    transform: translateY(-2px);
+}
+
+.music-player.minimized {
+    min-width: auto;
+    padding: 12px;
+}
+
+.music-player.minimized .music-player-content {
+    display: none;
+}
+
+.music-player-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.music-player-title {
+    font-family: 'Fraunces', serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #e9d5ff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.music-minimize-btn {
+    background: none;
+    border: none;
+    color: #a78bfa;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.music-minimize-btn:hover {
+    background: rgba(167, 139, 250, 0.1);
+    color: #c4b5fd;
+}
+
+.music-player-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.music-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.music-play-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #7c3aed;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.music-play-btn:hover {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+}
+
+.music-play-btn:active {
+    transform: scale(0.95);
+}
+
+.play-icon {
+    display: inline-block;
+    line-height: 1;
+}
+
+.volume-control {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.volume-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.volume-slider {
+    flex: 1;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(167, 139, 250, 0.2);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.volume-slider::-moz-range-thumb:hover {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+}
+
+.music-info {
+    font-size: 0.75rem;
+    color: #a78bfa;
+    text-align: center;
+    opacity: 0.8;
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .music-player {
+    background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .music-player {
+        bottom: 80px; /* Above mobile nav if exists */
+        right: 10px;
+        min-width: 240px;
+        padding: 12px;
+    }
+
+    .music-play-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+
+/* Pulse animation for play button when playing */
+@keyframes musicPulse {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(124, 58, 237, 0.6);
+    }
+}
+
+.music-play-btn.playing {
+    animation: musicPulse 2s ease-in-out infinite;
+}
