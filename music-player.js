@@ -32,7 +32,7 @@ class MusicPlayer {
         this.setupUI();
         this.attachEventListeners();
 
-        console.log('🎵 Balatro Music Player initialized!');
+        console.log('🎵 Background Music Player initialized!');
     }
 
     setupUI() {
@@ -148,7 +148,7 @@ class MusicPlayer {
             playerTitle.textContent = '⚠️ MP3 not found';
             playerTitle.style.color = '#ef4444';
             setTimeout(() => {
-                playerTitle.textContent = '🎴 Balatro Theme';
+                playerTitle.textContent = '🎵 Background Music';
                 playerTitle.style.color = '';
             }, 3000);
         }

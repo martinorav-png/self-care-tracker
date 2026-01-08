@@ -27,7 +27,7 @@
 }
 
 [data-theme="dark"] .plant-3d-container {
-    background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
     border-color: #4ade80;
     box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3),
                 inset 0 2px 4px rgba(255, 255, 255, 0.1);

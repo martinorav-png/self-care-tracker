@@ -1289,7 +1289,9 @@ document.addEventListener('keydown', (e) => {
             break;
         case 'd':
             e.preventDefault();
-            document.getElementById('themeToggle')?.click();
+            if (window.themeSwitcher) {
+                window.themeSwitcher.cycleTheme();
+            }
             break;
         case 'm':
             e.preventDefault();
@@ -1507,26 +1509,10 @@ function createConfetti() {
 // ================================
 // Dark Mode
 // ================================
-const themeToggle = document.getElementById('themeToggle');
-const themeIcon = themeToggle?.querySelector('.theme-icon');
-
-const savedTheme = localStorage.getItem('theme') || 'light';
-document.documentElement.setAttribute('data-theme', savedTheme);
-if (themeIcon) {
-    themeIcon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-}
-
-themeToggle?.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    
-    if (themeIcon) {
-        themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-    }
-});
+// ================================
+// Theme Toggle
+// ================================
+// Now handled by theme-switcher.js
 
 // ================================
 // Initialize App

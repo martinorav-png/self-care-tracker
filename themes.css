@@ -1,0 +1,261 @@
+/* ================================
+   THEME SYSTEM - 5 THEMES
+   ================================ */
+
+/* Theme Selector Buttons */
+.theme-selector {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+}
+
+.theme-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    border: 2px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.theme-btn:hover {
+    background: rgba(124, 58, 237, 0.1);
+    transform: scale(1.1);
+}
+
+.theme-btn:active {
+    transform: scale(0.95);
+}
+
+.theme-btn.active {
+    border-color: var(--color-accent);
+    background: rgba(124, 58, 237, 0.15);
+}
+
+.theme-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 2px;
+    background: var(--color-accent);
+    border-radius: 2px;
+}
+
+/* ================================
+   THEME 1: LIGHT (Default)
+   ================================ */
+:root {
+    /* Light theme colors */
+    --color-bg: #ffffff;
+    --color-surface: #fafafa;
+    --color-surface-elevated: #ffffff;
+    --color-text: #1a1a1a;
+    --color-text-secondary: #666666;
+    --color-border: #e5e5e5;
+    --color-accent: #7c3aed;
+    --color-accent-light: #8b5cf6;
+    --color-success: #22c55e;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    
+    /* Category colors - Light theme */
+    --category-tervishoid: #ef4444;
+    --category-liikumine: #f97316;
+    --category-toitumine: #84cc16;
+    --category-uni: #8b5cf6;
+    --category-sotsiaalne: #ec4899;
+    --category-hobid: #06b6d4;
+}
+
+/* ================================
+   THEME 2: DARK
+   ================================ */
+[data-theme="dark"] {
+    --color-bg: #0a0a0a;
+    --color-surface: #171717;
+    --color-surface-elevated: #262626;
+    --color-text: #fafafa;
+    --color-text-secondary: #a3a3a3;
+    --color-border: #404040;
+    --color-accent: #a78bfa;
+    --color-accent-light: #c4b5fd;
+    --color-success: #4ade80;
+    --color-warning: #fbbf24;
+    --color-error: #f87171;
+    
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.7);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.7);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.9);
+    
+    /* Category colors - Dark theme (brighter) */
+    --category-tervishoid: #f87171;
+    --category-liikumine: #fb923c;
+    --category-toitumine: #a3e635;
+    --category-uni: #a78bfa;
+    --category-sotsiaalne: #f472b6;
+    --category-hobid: #22d3ee;
+}
+
+/* ================================
+   THEME 3: CYBERPUNK
+   ================================ */
+[data-theme="cyberpunk"] {
+    --color-bg: #0a0e27;
+    --color-surface: #151937;
+    --color-surface-elevated: #1e2449;
+    --color-text: #e0e7ff;
+    --color-text-secondary: #94a3b8;
+    --color-border: #334155;
+    --color-accent: #00d4ff;
+    --color-accent-light: #38bdf8;
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-error: #ff006e;
+    
+    --shadow-sm: 0 0 10px rgba(0, 212, 255, 0.1);
+    --shadow-base: 0 0 20px rgba(0, 212, 255, 0.15);
+    --shadow-md: 0 0 30px rgba(0, 212, 255, 0.2);
+    --shadow-lg: 0 0 40px rgba(0, 212, 255, 0.25);
+    
+    /* Category colors - Cyberpunk (neon) */
+    --category-tervishoid: #ff006e;
+    --category-liikumine: #ff8500;
+    --category-toitumine: #00ff9f;
+    --category-uni: #9d4edd;
+    --category-sotsiaalne: #ff006e;
+    --category-hobid: #00d4ff;
+}
+
+/* ================================
+   THEME 4: FOREST
+   ================================ */
+[data-theme="forest"] {
+    --color-bg: #f0fdf4;
+    --color-surface: #dcfce7;
+    --color-surface-elevated: #ffffff;
+    --color-text: #14532d;
+    --color-text-secondary: #166534;
+    --color-border: #bbf7d0;
+    --color-accent: #22c55e;
+    --color-accent-light: #4ade80;
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-error: #dc2626;
+    
+    --shadow-sm: 0 1px 2px 0 rgba(34, 197, 94, 0.05);
+    --shadow-base: 0 1px 3px 0 rgba(34, 197, 94, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(34, 197, 94, 0.15);
+    --shadow-lg: 0 10px 15px -3px rgba(34, 197, 94, 0.2);
+    
+    /* Category colors - Forest (green spectrum) */
+    --category-tervishoid: #16a34a;
+    --category-liikumine: #84cc16;
+    --category-toitumine: #22c55e;
+    --category-uni: #059669;
+    --category-sotsiaalne: #10b981;
+    --category-hobid: #14b8a6;
+}
+
+/* ================================
+   THEME 5: OCEAN
+   ================================ */
+[data-theme="ocean"] {
+    --color-bg: #f0f9ff;
+    --color-surface: #e0f2fe;
+    --color-surface-elevated: #ffffff;
+    --color-text: #0c4a6e;
+    --color-text-secondary: #075985;
+    --color-border: #bae6fd;
+    --color-accent: #0ea5e9;
+    --color-accent-light: #38bdf8;
+    --color-success: #14b8a6;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    
+    --shadow-sm: 0 1px 2px 0 rgba(14, 165, 233, 0.05);
+    --shadow-base: 0 1px 3px 0 rgba(14, 165, 233, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(14, 165, 233, 0.15);
+    --shadow-lg: 0 10px 15px -3px rgba(14, 165, 233, 0.2);
+    
+    /* Category colors - Ocean (blue/teal spectrum) */
+    --category-tervishoid: #0891b2;
+    --category-liikumine: #06b6d4;
+    --category-toitumine: #14b8a6;
+    --category-uni: #0ea5e9;
+    --category-sotsiaalne: #3b82f6;
+    --category-hobid: #6366f1;
+}
+
+/* ================================
+   THEME-SPECIFIC ADJUSTMENTS
+   ================================ */
+
+/* Cyberpunk neon effects */
+[data-theme="cyberpunk"] .header {
+    border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+[data-theme="cyberpunk"] .task-item {
+    border-color: rgba(0, 212, 255, 0.2);
+}
+
+[data-theme="cyberpunk"] .task-item:hover {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+}
+
+[data-theme="cyberpunk"] .streak-badge {
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+}
+
+/* Forest natural feel */
+[data-theme="forest"] .container {
+    background: linear-gradient(to bottom, #f0fdf4, #ffffff);
+}
+
+[data-theme="forest"] .plant-3d-container {
+    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2);
+}
+
+/* Ocean wave effects */
+[data-theme="ocean"] .header {
+    background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+}
+
+[data-theme="ocean"] .stat-item {
+    background: linear-gradient(135deg, #bae6fd 0%, #e0f2fe 100%);
+}
+
+/* Smooth theme transitions */
+* {
+    transition: background-color 0.3s ease, 
+                border-color 0.3s ease, 
+                color 0.3s ease,
+                box-shadow 0.3s ease;
+}
+
+/* Don't transition transforms (breaks animations) */
+*:not(.task-item):not(.theme-btn):not(button) {
+    transition: background-color 0.3s ease, 
+                border-color 0.3s ease, 
+                color 0.3s ease,
+                box-shadow 0.3s ease;
+}
