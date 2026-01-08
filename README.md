@@ -14,11 +14,11 @@ Minimalistlik veebirakendus igapäevaste hoolitsusülesannete jälgimiseks. Stre
 
 -  **Task management** - CRUD, 10 kategooriat, filtreerimine
 -  **Streak tracking** - päevade arv järjest, milestone'id (3→7→14→30→60→100 päeva)
--  **Quick add** - 6 kiire nuppu levinud ülesannete jaoks
+-  **Quick add** - 6 kiiret nuppu levinud ülesannete jaoks
 -  **Statistika** - päevane progress, progress bar
 -  **UX** - dark mode, toast notifications, confetti, sound effects
 -  **Export/Import** - JSON ja CSV formaadis
--  **Accessibility** - semantic HTML, ARIA, keyboard navigation, WCAG AA
+-  **Accessibility** - semantic HTML, ARIA, keyboard navigation
 
 ## Tech Stack
 
@@ -83,4 +83,4 @@ const SUPABASE_ANON_KEY = 'sinu-key';
 
 ## Autor
 
-Martin Orav - EKA Digital Product Design tudeng
+Martin Orav
