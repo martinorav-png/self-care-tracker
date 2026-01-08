@@ -1255,7 +1255,7 @@ document.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
     
     switch(key) {
-        case '?':
+        case 'f1':
             e.preventDefault();
             showKeyboardModal();
             break;
